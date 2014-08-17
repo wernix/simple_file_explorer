@@ -471,3 +471,75 @@ void MainWindow::on_actionQuit_triggered()
         return;
     }
 }
+
+void MainWindow::on_left_customContextMenuRequested()
+{
+    QMenu contextMenu;
+    bool isDir = dirExist(dir_left->path() + QDir::separator() + ui->left->currentIndex().data().toString());
+
+    if(!isDir) {
+        contextMenu.addAction("Run");
+        contextMenu.addSeparator();
+    }
+
+    contextMenu.addAction("Copy");
+    contextMenu.addAction("Move");
+    contextMenu.addAction("Delete");
+    contextMenu.setDefaultAction(NULL);
+
+    // Get option from context menu
+    QAction *selectedItem = contextMenu.exec(ui->left->cursor().pos());
+
+    if(selectedItem != NULL) {
+        QString choose = selectedItem->text();
+
+        if(choose == "Run")
+            on_left_doubleClicked(ui->left->currentIndex());
+
+        if(choose == "Copy")
+            ui->actionCp->triggered();
+
+        if(choose == "Move")
+            ui->actionMv->triggered();
+
+        if(choose == "Delete")
+            ui->actionRm->triggered();
+    }
+}
+
+void MainWindow::on_right_customContextMenuRequested()
+{
+    QMenu contextMenu;
+    bool isDir = dirExist(dir_right->path() + QDir::separator() + ui->right->currentIndex().data().toString());
+
+    // If selected item isn't dir
+    // add this option to menu
+    if(!isDir) {
+        contextMenu.addAction("Run");
+        contextMenu.addSeparator();
+    }
+
+    contextMenu.addAction("Copy");
+    contextMenu.addAction("Move");
+    contextMenu.addAction("Delete");
+    contextMenu.setDefaultAction(NULL);
+
+    // Get option from context menu
+    QAction *selectedItem = contextMenu.exec(ui->right->cursor().pos());
+
+    if(selectedItem != NULL) {
+        QString choose = selectedItem->text();
+
+        if(choose == "Run")
+            on_left_doubleClicked(ui->right->currentIndex());
+
+        if(choose == "Copy")
+            ui->actionCp->triggered();
+
+        if(choose == "Move")
+            ui->actionMv->triggered();
+
+        if(choose == "Delete")
+            ui->actionRm->triggered();
+    }
+}

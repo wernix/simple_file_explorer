@@ -11,6 +11,7 @@
 #include <QAction>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QMenu>
 
 
 namespace Ui {
@@ -64,6 +65,8 @@ private slots:
     void on_actionGoHome_triggered();
 
     void on_actionQuit_triggered();
+    void on_left_customContextMenuRequested();
+    void on_right_customContextMenuRequested();
 };
 
 #endif // MAINWINDOW_H

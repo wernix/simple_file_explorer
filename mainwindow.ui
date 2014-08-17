@@ -34,6 +34,9 @@
           <pointsize>8</pointsize>
          </font>
         </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
         <property name="alternatingRowColors">
          <bool>true</bool>
         </property>
@@ -46,6 +49,9 @@
           <family>Arial</family>
           <pointsize>8</pointsize>
          </font>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
         </property>
         <property name="alternatingRowColors">
          <bool>true</bool>
