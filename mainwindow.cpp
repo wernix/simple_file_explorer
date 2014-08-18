@@ -147,7 +147,7 @@ void MainWindow::on_right_doubleClicked(const QModelIndex & index)
 }
 
 // Copy action
-void MainWindow::on_actionCp_triggered()
+void MainWindow::on_actionToolbarCopy_triggered()
 {
     QString fileName;
     QString sourcePath;
@@ -262,7 +262,7 @@ bool MainWindow::copyFiles(QStringList list, QString sourcePath, QString destina
 }
 
 // Move action
-void MainWindow::on_actionMv_triggered()
+void MainWindow::on_actionToolbarMove_triggered()
 {
     QString sourcePath;
     QString destinationPath;
@@ -326,7 +326,7 @@ void MainWindow::on_actionMv_triggered()
 }
 
 // Remove action
-void MainWindow::on_actionRm_triggered()
+void MainWindow::on_actionToolbarRemove_triggered()
 {
     QString sourcePath;
     QStringList deleteList;
@@ -374,7 +374,7 @@ void MainWindow::on_actionPressEnter_triggered()
 }
 
 // Go Home action F2
-void MainWindow::on_actionGoHome_triggered()
+void MainWindow::on_actionToolbarGoHome_triggered()
 {
     bool left = ui->left->hasFocus();
     bool right = ui->right->hasFocus();
@@ -501,13 +501,13 @@ void MainWindow::on_left_customContextMenuRequested()
             on_left_doubleClicked(ui->left->currentIndex());
 
         if(choose == "Copy")
-            ui->actionCp->triggered();
+            ui->actionToolbarCopy->triggered();
 
         if(choose == "Move")
-            ui->actionMv->triggered();
+            ui->actionToolbarMove->triggered();
 
         if(choose == "Delete")
-            ui->actionRm->triggered();
+            ui->actionToolbarRemove->triggered();
     }
 }
 
@@ -538,13 +538,13 @@ void MainWindow::on_right_customContextMenuRequested()
             on_left_doubleClicked(ui->right->currentIndex());
 
         if(choose == "Copy")
-            ui->actionCp->triggered();
+            ui->actionToolbarCopy->triggered();
 
         if(choose == "Move")
-            ui->actionMv->triggered();
+            ui->actionToolbarMove->triggered();
 
         if(choose == "Delete")
-            ui->actionRm->triggered();
+            ui->actionToolbarRemove->triggered();
     }
 }
 
@@ -574,4 +574,9 @@ void MainWindow::on_actionInfo_triggered()
 
     info.setLayout(layout);
     info.exec();
+}
+
+void MainWindow::on_actionToolbarQuit_triggered()
+{
+    on_actionQuit_triggered();
 }

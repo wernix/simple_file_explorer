@@ -57,20 +57,21 @@ private slots:
 
     void on_right_doubleClicked(const QModelIndex & index);
 
-    void on_actionCp_triggered();
+    void on_actionToolbarCopy_triggered();
 
-    void on_actionMv_triggered();
+    void on_actionToolbarMove_triggered();
 
-    void on_actionRm_triggered();
+    void on_actionToolbarRemove_triggered();
 
     void on_actionPressEnter_triggered();
 
-    void on_actionGoHome_triggered();
+    void on_actionToolbarGoHome_triggered();
 
     void on_actionQuit_triggered();
     void on_left_customContextMenuRequested();
     void on_right_customContextMenuRequested();
     void on_actionInfo_triggered();
+    void on_actionToolbarQuit_triggered();
 };
 
 #endif // MAINWINDOW_H

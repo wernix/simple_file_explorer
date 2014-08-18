@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>414</width>
-    <height>319</height>
+    <width>425</width>
+    <height>322</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,7 +67,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>414</width>
+     <width>425</width>
      <height>20</height>
     </rect>
    </property>
@@ -88,8 +88,17 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
    <property name="windowTitle">
     <string>toolBar</string>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>BottomToolBarArea</enum>
@@ -97,14 +106,15 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionGoHome"/>
-   <addaction name="actionCp"/>
-   <addaction name="actionMv"/>
-   <addaction name="actionRm"/>
+   <addaction name="actionToolbarGoHome"/>
+   <addaction name="actionToolbarCopy"/>
+   <addaction name="actionToolbarMove"/>
+   <addaction name="actionToolbarRemove"/>
+   <addaction name="actionToolbarQuit"/>
   </widget>
-  <action name="actionCp">
+  <action name="actionToolbarCopy">
    <property name="text">
-    <string>[F5/Cp]</string>
+    <string>[F5/Copy]</string>
    </property>
    <property name="toolTip">
     <string>copy</string>
@@ -113,9 +123,9 @@
     <string>F5</string>
    </property>
   </action>
-  <action name="actionRm">
+  <action name="actionToolbarRemove">
    <property name="text">
-    <string>[Del/Rm]</string>
+    <string>[Del/Remove]</string>
    </property>
    <property name="toolTip">
     <string>delete</string>
@@ -124,9 +134,9 @@
     <string>Del</string>
    </property>
   </action>
-  <action name="actionMv">
+  <action name="actionToolbarMove">
    <property name="text">
-    <string>[F6/Mv]</string>
+    <string>[F6/Move]</string>
    </property>
    <property name="toolTip">
     <string>move</string>
@@ -143,7 +153,7 @@
     <string>Return</string>
    </property>
   </action>
-  <action name="actionGoHome">
+  <action name="actionToolbarGoHome">
    <property name="text">
     <string>[F2/Home]</string>
    </property>
@@ -162,6 +172,17 @@
   <action name="actionInfo">
    <property name="text">
     <string>Info</string>
+   </property>
+  </action>
+  <action name="actionToolbarQuit">
+   <property name="text">
+    <string>[F10/Quit]</string>
+   </property>
+   <property name="toolTip">
+    <string>quit</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
    </property>
   </action>
  </widget>
