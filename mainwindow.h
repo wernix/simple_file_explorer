@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDialog>
+#include <QLabel>
 #include <QFileSystemModel>
 #include <QDir>
 #include <QDirIterator>
@@ -12,6 +14,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QMenu>
+#include <QLayout>
 
 
 namespace Ui {
@@ -67,6 +70,7 @@ private slots:
     void on_actionQuit_triggered();
     void on_left_customContextMenuRequested();
     void on_right_customContextMenuRequested();
+    void on_actionInfo_triggered();
 };
 
 #endif // MAINWINDOW_H

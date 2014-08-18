@@ -543,3 +543,32 @@ void MainWindow::on_right_customContextMenuRequested()
             ui->actionRm->triggered();
     }
 }
+
+void MainWindow::on_actionInfo_triggered()
+{
+    QDialog info;
+    info.setWindowTitle("Information");
+    info.setMinimumWidth(200);
+    info.setMinimumHeight(70);
+    info.setContentsMargins(QMargins(10, 10, 10, 10));
+
+    QLabel *title = new QLabel(&info);
+    title->setText("File Explorer");
+    title->setAlignment(Qt::AlignCenter);
+    title->setFont(QFont("Arial", 20, 600));
+    title->setFixedWidth(info.minimumWidth());
+
+    QLabel *author = new QLabel(&info);
+    author->setText("by wernix");
+    author->setFont(QFont("Arial", 10, 400, true));
+    author->setAlignment(Qt::AlignRight);
+    //author->setMargin(30);
+    author->setFixedWidth(info.minimumWidth() - 20);
+
+    QVBoxLayout *layout = new QVBoxLayout();
+    layout->addWidget(title);
+    layout->addWidget(author);
+
+    info.setLayout(layout);
+    info.exec();
+}
