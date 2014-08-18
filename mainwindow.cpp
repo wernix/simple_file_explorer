@@ -562,10 +562,9 @@ void MainWindow::on_actionInfo_triggered()
     author->setText("by wernix");
     author->setFont(QFont("Arial", 10, 400, true));
     author->setAlignment(Qt::AlignRight);
-    //author->setMargin(30);
     author->setFixedWidth(info.minimumWidth() - 20);
 
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *layout = new QVBoxLayout(&info);
     layout->addWidget(title);
     layout->addWidget(author);
 
