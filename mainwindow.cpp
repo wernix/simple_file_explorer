@@ -379,11 +379,15 @@ void MainWindow::on_actionGoHome_triggered()
     bool left = ui->left->hasFocus();
     bool right = ui->right->hasFocus();
 
-    if(left)
+    if(left) {
+        dir_left->setPath(defaultPath);
         ui->left->setRootIndex(fs_model_left->setRootPath(defaultPath));
+    }
 
-    if(right)
+    if(right) {
+        dir_right->setPath(defaultPath);
         ui->right->setRootIndex(fs_model_right->setRootPath(defaultPath));
+    }
 }
 
 // Create dirs function
