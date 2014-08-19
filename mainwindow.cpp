@@ -9,6 +9,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    utils = new Utils;
+    utils->debug = debug;
+
     // Set default dirs
     dir_left = new QDir(defaultPath);
     dir_right = new QDir(defaultPath);
@@ -27,6 +30,7 @@ MainWindow::~MainWindow()
     delete fs_model_right;
     delete dir_left;
     delete dir_right;
+    delete utils;
 }
 
 void MainWindow::prepareFileExplorer()
@@ -53,6 +57,42 @@ void MainWindow::prepareFileExplorer()
     ui->right->setIconSize(QSize(12,12));
     ui->right->show();
 
+}
+
+QString MainWindow::getSourcePath()
+{
+    QString sourcePath;
+
+    if(ui->left->hasFocus())
+        sourcePath = dir_left->path() + QDir::separator() + ui->left->currentIndex().data().toString();
+    if(ui->right->hasFocus())
+        sourcePath = dir_right->path() + QDir::separator() + ui->right->currentIndex().data().toString();
+
+    return sourcePath;
+}
+
+QString MainWindow::getDestinationPath()
+{
+    QString destinationPath;
+
+    if(ui->left->hasFocus())
+        destinationPath = dir_right->path() + QDir::separator() + ui->left->currentIndex().data().toString();
+    if(ui->right->hasFocus())
+        destinationPath = dir_left->path() + QDir::separator() + ui->right->currentIndex().data().toString();
+
+    return destinationPath;
+}
+
+QString MainWindow::getCurrentPath()
+{
+    QString path;
+
+    if(ui->left->hasFocus())
+        path = dir_left->path();
+    if(ui->right->hasFocus())
+        path = dir_right->path();
+
+    return path;
 }
 
 // Function show current index when folder been loaded
@@ -115,7 +155,7 @@ void MainWindow::on_left_doubleClicked(const QModelIndex & index)
 {
     // If changeRoot(false) run app
     if(!changeRoot()) {
-        QString path = dir_left->path() + QDir::separator() + index.data().toString();
+        QString path = getCurrentPath();
         switch(QMessageBox::question(this,
                                      "Run?",
                                      QString("Run this file:\n " + path + " ?"),
@@ -133,7 +173,7 @@ void MainWindow::on_right_doubleClicked(const QModelIndex & index)
 {
     // If changeRoot(false) run app
     if(!changeRoot()) {
-        QString path = dir_right->path() + QDir::separator() + index.data().toString();
+        QString path = getCurrentPath();
         switch(QMessageBox::question(this,
                                      "Run?",
                                      QString("Run this file:\n " + path + " ?"),
@@ -149,28 +189,13 @@ void MainWindow::on_right_doubleClicked(const QModelIndex & index)
 // Copy action
 void MainWindow::on_actionToolbarCopy_triggered()
 {
-    QString fileName;
-    QString sourcePath;
-    QString fromPath;
-    QString destinationPath;
+    QString sourcePath = getSourcePath();
+    //QString fromPath = getCurrentPath();
+    QString destinationPath = getDestinationPath();
 
     QStringList fileList;
 
-    // If left side is actual use...
-    if(ui->left->hasFocus()) {
-        sourcePath = dir_left->path() + QDir::separator() + ui->left->currentIndex().data().toString();
-        destinationPath = dir_right->path() + QDir::separator() + ui->left->currentIndex().data().toString();
-        fromPath = dir_left->path();
-        fileList << sourcePath;
-    }
-
-    // If right side is actual use...
-    if(ui->right->hasFocus()) {
-        sourcePath = dir_right->path() + QDir::separator() + ui->right->currentIndex().data().toString();
-        destinationPath = dir_left->path() + QDir::separator() + ui->right->currentIndex().data().toString();
-        fromPath = dir_right->path();
-        fileList << sourcePath;
-    }
+    fileList << sourcePath;
 
     // Show question
     switch(QMessageBox::question(this,
@@ -187,99 +212,31 @@ void MainWindow::on_actionToolbarCopy_triggered()
     }
 
     // If copy dir
-    if(dirExist(sourcePath)) {
-        if(copyDirs(sourcePath, destinationPath))
+    if(utils->dirExist(sourcePath)) {
+        if(utils->copyDirs(sourcePath, destinationPath))
             QMessageBox::information(this, "Copied!", QString("Dir copied from:\n " + sourcePath + " to " + destinationPath), QMessageBox::NoButton);
         else
             QMessageBox::critical(this, "Error!", QString("Ups! Something is wrong. I can't copied dir from:\n" + sourcePath + " to " + destinationPath), QMessageBox::NoButton);
     }
 
     // If copy file
-    if(!dirExist(sourcePath)) {
-        if(copyFiles(fileList, sourcePath, destinationPath)) {
+    if(!utils->dirExist(sourcePath)) {
+        if(utils->copyFiles(fileList, sourcePath, destinationPath)) {
             QMessageBox::information(this, "Copied!", QString("File/s copied from:\n " + sourcePath + " to " + destinationPath), QMessageBox::NoButton);
         }else
             QMessageBox::critical(this, "Error!", QString("Ups! Something is wrong. I can't copied file/s from:\n" + sourcePath + " to " + destinationPath), QMessageBox::NoButton);
     }
 }
 
-// Check dir exist
-bool MainWindow::dirExist(QString sourcePath)
-{
-    QDir dir(sourcePath);
-    return dir.exists();
-}
-
-bool MainWindow::deleteAll(QStringList list)
-{
-    bool ok = false;
-
-    for(int i = 0; i < list.length(); i++) {
-        bool isDir = dirExist(list.at(i));
-
-        if(isDir) {
-            QDir(list.at(i)).removeRecursively();
-            ok = true;
-        }else {
-            QDir().remove(list.at(i));
-            ok = true;
-        }
-
-        if(debug == true)
-            qDebug() << "[Delete] Deleted " << list.at(i);
-
-        if(!ok)
-            if(debug == true)
-                qDebug() << "[Delete] Error:" << list.at(i);
-
-    }
-
-    return ok;
-}
-
-// Copy single files function
-bool MainWindow::copyFiles(QStringList list, QString sourcePath, QString destinationPath)
-{
-    bool ok = true;
-
-    for(int i = 0; i < list.length(); i++)
-    {
-        QFile file(list.at(i));
-        QString newFile = list.at(i);
-        newFile.replace(sourcePath, destinationPath);
-
-        if(file.copy(newFile)) {
-            if(debug == true)
-                qDebug() << "[Copy] Copied " << list.at(i);
-        }else {
-            if(debug == true)
-                qDebug() << "[Copy] Error: " << list.at(i);
-            ok = false;
-        }
-    }
-
-    return ok;
-}
 
 // Move action
 void MainWindow::on_actionToolbarMove_triggered()
 {
-    QString sourcePath;
-    QString destinationPath;
+    QString sourcePath = getSourcePath();
+    QString destinationPath = getDestinationPath();
     QStringList deleteList;
-    bool isDir = dirExist(sourcePath);
+    bool isDir = utils->dirExist(sourcePath);
 
-    // If left side is actual use...
-    if(ui->left->hasFocus()) {
-        sourcePath = dir_left->path() + QDir::separator() + ui->left->currentIndex().data().toString();
-        destinationPath = dir_right->path() + QDir::separator() + ui->left->currentIndex().data().toString();
-    }
-
-    // If right side is actual use...
-    if(ui->right->hasFocus()) {
-        sourcePath = dir_right->path() + QDir::separator() + ui->right->currentIndex().data().toString();
-        destinationPath = dir_left->path() + QDir::separator() + ui->right->currentIndex().data().toString();
-    }
 
     // Show question
     switch(QMessageBox::question(this,
@@ -298,7 +255,7 @@ void MainWindow::on_actionToolbarMove_triggered()
     deleteList << sourcePath;
 
     if(isDir) {
-        if(copyDirs(sourcePath, destinationPath)) {
+        if(utils->copyDirs(sourcePath, destinationPath)) {
             if(debug == true)
                 qDebug() << "[Move] Copied " << sourcePath;
         }else {
@@ -309,7 +266,7 @@ void MainWindow::on_actionToolbarMove_triggered()
     }
 
     if(!isDir) {
-        if(copyFiles(deleteList, sourcePath, destinationPath)) {
+        if(utils->copyFiles(deleteList, sourcePath, destinationPath)) {
             if(debug == true)
                 qDebug() << "[Move] Copied " << sourcePath;
         }else {
@@ -319,7 +276,7 @@ void MainWindow::on_actionToolbarMove_triggered()
         }
     }
 
-    if(deleteAll(deleteList))
+    if(utils->deleteAll(deleteList))
         QMessageBox::information(this, "Moved!", QString("Item moved from:\n" + sourcePath + " to " + destinationPath), QMessageBox::NoButton);
     else
         QMessageBox::critical(this, "Error!", QString("Ups! Something is wrong. I can't moved item from:\n" + sourcePath + " to " + destinationPath), QMessageBox::NoButton);
@@ -328,15 +285,8 @@ void MainWindow::on_actionToolbarMove_triggered()
 // Remove action
 void MainWindow::on_actionToolbarRemove_triggered()
 {
-    QString sourcePath;
+    QString sourcePath = getSourcePath();
     QStringList deleteList;
-    bool left = ui->left->hasFocus();
-    bool right = ui->right->hasFocus();
-
-    if(left)
-        sourcePath = dir_left->path() + QDir::separator() + ui->left->currentIndex().data().toString();
-    if(right)
-        sourcePath = dir_right->path() + QDir::separator() + ui->right->currentIndex().data().toString();
 
     // Show question
     switch(QMessageBox::question(this,
@@ -352,10 +302,9 @@ void MainWindow::on_actionToolbarRemove_triggered()
         return;
     }
 
-
     deleteList << sourcePath;
 
-    if(deleteAll(deleteList)) {
+    if(utils->deleteAll(deleteList)) {
         qDebug() << "[Delete] Deleted " << deleteList.length() << " item/s.";
     }else
         qDebug() << "[Delete] Error not deleted.";
@@ -364,100 +313,26 @@ void MainWindow::on_actionToolbarRemove_triggered()
 // Enter action
 void MainWindow::on_actionPressEnter_triggered()
 {
-    bool left = ui->left->hasFocus();
-    bool right = ui->right->hasFocus();
-
-    if(right)
+    if(ui->right->hasFocus())
         on_right_doubleClicked(ui->right->currentIndex());
-    if(left)
+    if(ui->left->hasFocus())
         on_left_doubleClicked(ui->left->currentIndex());
 }
 
 // Go Home action F2
 void MainWindow::on_actionToolbarGoHome_triggered()
 {
-    bool left = ui->left->hasFocus();
-    bool right = ui->right->hasFocus();
-
-    if(left) {
+    if(ui->left->hasFocus()) {
         dir_left->setPath(defaultPath);
         ui->left->setRootIndex(fs_model_left->setRootPath(defaultPath));
     }
 
-    if(right) {
+    if(ui->right->hasFocus()) {
         dir_right->setPath(defaultPath);
         ui->right->setRootIndex(fs_model_right->setRootPath(defaultPath));
     }
 }
 
-// Create dirs function
-bool MainWindow::mkDirs(QStringList list)
-{
-    bool ok = true;
-
-    for(int i = 0; i < list.length(); i++) {
-        if(QDir().mkpath(list.at(i))) {
-            if(debug == true)
-                qDebug() << "[mkDirs] Created " << list.at(i);
-        }else {
-            if(debug == true)
-                qDebug() << "[mkDirs] Error: " << list.at(i);
-            ok = false;
-        }
-    }
-
-    return ok;
-}
-
-// Copy dirs (files, sub-dirs) functions
-bool MainWindow::copyDirs(QString sourcePath, QString destinationPath)
-{
-    bool ok = true;
-
-    QStringList filesList;
-    QStringList dirsList;
-
-    QDirIterator files(sourcePath, QDir::Files, QDirIterator::NoIteratorFlags);
-    while(files.hasNext()) {
-        files.next();
-        filesList << files.filePath();
-    }
-
-    // Add all sub dirs in copy dirs list
-    QDirIterator subDirs(sourcePath, QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    dirsList << QString(sourcePath).replace(sourcePath, destinationPath);
-    while(subDirs.hasNext()) {
-        subDirs.next();
-        dirsList << subDirs.filePath().replace(sourcePath, destinationPath);
-
-        // Add files from sub dirs to copy list
-        QDirIterator files(subDirs.filePath(), QDir::Files, QDirIterator::NoIteratorFlags);
-        while(files.hasNext()) {
-            files.next();
-            filesList << files.filePath();
-        }
-    }
-
-    if(dirsList.length()) {
-        if(mkDirs(dirsList)) {
-            qDebug() << "[mkDirs] Created " << dirsList.length() << " dirs.";
-        }else {
-            qDebug() << "[mkDirs] Ups! Something is wrong.";
-            ok = false;
-        }
-    }
-
-    if(filesList.length()) {
-        if(copyFiles(filesList, sourcePath, destinationPath)) {
-            qDebug() << "[Copy] Copy " << filesList.length() << " files.";
-        }else {
-            qDebug() << "[Copy] Ups! Something is wrong.";
-            ok = false;
-        }
-    }
-
-    return ok;
-}
 
 // Quit action
 void MainWindow::on_actionQuit_triggered()
@@ -479,7 +354,7 @@ void MainWindow::on_actionQuit_triggered()
 void MainWindow::on_left_customContextMenuRequested()
 {
     QMenu contextMenu;
-    bool isDir = dirExist(dir_left->path() + QDir::separator() + ui->left->currentIndex().data().toString());
+    bool isDir = utils->dirExist(dir_left->path() + QDir::separator() + ui->left->currentIndex().data().toString());
 
     if(!isDir) {
         contextMenu.addAction("Run");
@@ -514,7 +389,7 @@ void MainWindow::on_left_customContextMenuRequested()
 void MainWindow::on_right_customContextMenuRequested()
 {
     QMenu contextMenu;
-    bool isDir = dirExist(dir_right->path() + QDir::separator() + ui->right->currentIndex().data().toString());
+    bool isDir = utils->dirExist(dir_right->path() + QDir::separator() + ui->right->currentIndex().data().toString());
 
     // If selected item isn't dir
     // add this option to menu

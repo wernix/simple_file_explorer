@@ -5,16 +5,14 @@
 #include <QDialog>
 #include <QLabel>
 #include <QFileSystemModel>
-#include <QDir>
-#include <QDirIterator>
 #include <QDebug>
-#include <QFile>
 #include <QMessageBox>
-#include <QAction>
 #include <QDesktopServices>
 #include <QUrl>
 #include <QMenu>
 #include <QLayout>
+
+#include "utils.h"
 
 
 namespace Ui {
@@ -28,6 +26,8 @@ class MainWindow : public QMainWindow
 private:
     Ui::MainWindow *ui;
 
+    Utils *utils;
+
     QString defaultPath;
     QFileSystemModel *fs_model_left;
     QFileSystemModel *fs_model_right;
@@ -35,14 +35,9 @@ private:
     bool debug;
 
     void prepareFileExplorer();
-    void cdUp();
-    void prepareDirsList();
-    void prepareFilesList();
-    bool dirExist(QString path);
-    bool mkDirs(QStringList list);
-    bool copyFiles(QStringList list, QString sourcePath, QString destinationPath);
-    bool copyDirs(QString sourcePath, QString destinationPath);
-    bool deleteAll(QStringList list);
+    QString getSourcePath();
+    QString getDestinationPath();
+    QString getCurrentPath();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -54,19 +49,12 @@ private slots:
     bool changeRoot();
 
     void on_left_doubleClicked(const QModelIndex & index);
-
     void on_right_doubleClicked(const QModelIndex & index);
-
     void on_actionToolbarCopy_triggered();
-
     void on_actionToolbarMove_triggered();
-
     void on_actionToolbarRemove_triggered();
-
     void on_actionPressEnter_triggered();
-
     void on_actionToolbarGoHome_triggered();
-
     void on_actionQuit_triggered();
     void on_left_customContextMenuRequested();
     void on_right_customContextMenuRequested();
