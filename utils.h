@@ -23,6 +23,7 @@ public:
     bool copyFiles(QStringList list, QString sourcePath, QString destinationPath);
     bool copyDirs(QString sourcePath, QString destinationPath);
     bool deleteAll(QStringList list);
+    bool rename(QString sourcePath, QString newPath);
 
 signals:
 

@@ -1,6 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "renamedialog.h"
+#include "ui_renamedialog.h"
+#include "copydialog.h"
+#include "ui_copydialog.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -37,7 +42,7 @@ void MainWindow::prepareFileExplorer()
 {
     // setup left side
     fs_model_left = new QFileSystemModel();
-    fs_model_left->setReadOnly(true);
+    fs_model_left->setReadOnly(false);
     fs_model_left->setFilter(QDir::AllEntries | QDir::NoDot);
     fs_model_left->setRootPath(dir_left->path());
     ui->left->setModel(fs_model_left);
@@ -48,7 +53,7 @@ void MainWindow::prepareFileExplorer()
 
     // setup right side
     fs_model_right = new QFileSystemModel();
-    fs_model_right->setReadOnly(true);
+    fs_model_right->setReadOnly(false);
     fs_model_right->setFilter(QDir::AllEntries | QDir::NoDot);
     fs_model_right->setRootPath(dir_right->path());
     ui->right->setModel(fs_model_right);
@@ -94,6 +99,21 @@ QString MainWindow::getCurrentPath()
 
     return path;
 }
+
+
+// Return filename or dir name
+QString MainWindow::getItemName()
+{
+    QString name;
+
+    if(ui->left->hasFocus())
+        name = ui->left->currentIndex().data().toString();
+    if(ui->right->hasFocus())
+        name = ui->right->currentIndex().data().toString();
+
+    return name;
+}
+
 
 // Function show current index when folder been loaded
 void MainWindow::modelLeft_directoryLoaded()
@@ -190,26 +210,25 @@ void MainWindow::on_right_doubleClicked(const QModelIndex & index)
 void MainWindow::on_actionToolbarCopy_triggered()
 {
     QString sourcePath = getSourcePath();
-    //QString fromPath = getCurrentPath();
     QString destinationPath = getDestinationPath();
-
     QStringList fileList;
 
-    fileList << sourcePath;
+    CopyDialog copyDialog;
+    copyDialog.ui->sourcePath->setText(sourcePath);
+    copyDialog.ui->sourcePath->setReadOnly(true);
+    copyDialog.ui->destinationPath->setText(destinationPath);
 
-    // Show question
-    switch(QMessageBox::question(this,
-                                 "Copy?",
-                                 QString("Are you sure to copy this item:"
-                                         "\n '" + sourcePath + "' to '" + destinationPath + "' ?"),
-                                 QMessageBox::Yes, QMessageBox::No))
+    switch(copyDialog.exec())
     {
-    case QMessageBox::Yes:
+    case QDialog::Accepted:
+        sourcePath = copyDialog.ui->sourcePath->text();
+        destinationPath = copyDialog.ui->destinationPath->text();
+        fileList << sourcePath;
         break;
-    case QMessageBox::No:
-        qDebug() << "[Copy] Aborted.";
+    case QDialog::Rejected:
         return;
     }
+
 
     // If copy dir
     if(utils->dirExist(sourcePath)) {
@@ -235,24 +254,33 @@ void MainWindow::on_actionToolbarMove_triggered()
     QString sourcePath = getSourcePath();
     QString destinationPath = getDestinationPath();
     QStringList deleteList;
-    bool isDir = utils->dirExist(sourcePath);
+    bool isDir;
 
+    CopyDialog moveDialog;
+    moveDialog.setWindowTitle("Move");
+    moveDialog.ui->sourcePath->setText(sourcePath);
+    moveDialog.ui->sourcePath->setReadOnly(true);
+    moveDialog.ui->destinationPath->setText(destinationPath);
 
-    // Show question
-    switch(QMessageBox::question(this,
-                                 "Move?",
-                                 QString("Are you sure to move this item:"
-                                         "\n '" + sourcePath + "' to '" + destinationPath + "' ?"),
-                                 QMessageBox::Yes, QMessageBox::No))
+    switch(moveDialog.exec())
     {
-    case QMessageBox::Yes:
+    case QDialog::Accepted:
+        sourcePath = moveDialog.ui->sourcePath->text();
+        destinationPath = moveDialog.ui->destinationPath->text();
+        isDir = utils->dirExist(sourcePath);
+        deleteList << sourcePath;
         break;
-    case QMessageBox::No:
-        qDebug() << "[Move] Aborted.";
+    case QDialog::Rejected:
         return;
     }
 
-    deleteList << sourcePath;
+    // Check move items
+    for(int i = 0; i < deleteList.length(); i++) {
+        if(destinationPath.contains(deleteList.at(i))) {
+            QMessageBox::critical(this, "Moving error", QString("You can not move:\n"+deleteList.at(i)+"\nto:\n"+destinationPath+"\nPath incorrect. Aborted."), QMessageBox::NoButton);
+            return;
+        }
+    }
 
     if(isDir) {
         if(utils->copyDirs(sourcePath, destinationPath)) {
@@ -296,13 +324,12 @@ void MainWindow::on_actionToolbarRemove_triggered()
                                  QMessageBox::Yes, QMessageBox::No))
     {
     case QMessageBox::Yes:
+        deleteList << sourcePath;
         break;
     case QMessageBox::No:
         qDebug() << "[Delete] Aborted.";
         return;
     }
-
-    deleteList << sourcePath;
 
     if(utils->deleteAll(deleteList)) {
         qDebug() << "[Delete] Deleted " << deleteList.length() << " item/s.";
@@ -315,6 +342,7 @@ void MainWindow::on_actionPressEnter_triggered()
 {
     if(ui->right->hasFocus())
         on_right_doubleClicked(ui->right->currentIndex());
+
     if(ui->left->hasFocus())
         on_left_doubleClicked(ui->left->currentIndex());
 }
@@ -363,6 +391,7 @@ void MainWindow::on_left_customContextMenuRequested()
 
     contextMenu.addAction("Copy");
     contextMenu.addAction("Move");
+    contextMenu.addAction("Rename");
     contextMenu.addAction("Delete");
     contextMenu.setDefaultAction(NULL);
 
@@ -380,6 +409,9 @@ void MainWindow::on_left_customContextMenuRequested()
 
         if(choose == "Move")
             ui->actionToolbarMove->triggered();
+
+        if(choose == "Rename")
+            ui->actionToolbarRename->triggered();
 
         if(choose == "Delete")
             ui->actionToolbarRemove->triggered();
@@ -418,6 +450,9 @@ void MainWindow::on_right_customContextMenuRequested()
         if(choose == "Move")
             ui->actionToolbarMove->triggered();
 
+        if(choose == "Rename")
+            ui->actionToolbarRename->triggered();
+
         if(choose == "Delete")
             ui->actionToolbarRemove->triggered();
     }
@@ -454,4 +489,56 @@ void MainWindow::on_actionInfo_triggered()
 void MainWindow::on_actionToolbarQuit_triggered()
 {
     on_actionQuit_triggered();
+}
+
+void MainWindow::on_actionToolbarRename_triggered()
+{
+    QString path = getCurrentPath();
+    QString itemName = getItemName();
+    QString sourcePath = getSourcePath();
+    QString newPath;
+
+    RenameDialog renameDialog;
+    renameDialog.ui->lineEdit->setText(itemName);
+
+    switch(renameDialog.exec())
+    {
+    case QDialog::Accepted:
+        newPath = path + QDir::separator() + renameDialog.ui->lineEdit->text();
+        break;
+    case QDialog::Rejected:
+        return;
+    }
+
+    if(utils->rename(sourcePath, newPath)) {
+        qDebug() << "[Rename] Success! Item sets new name.";
+    }else
+        qDebug() << "[Rename] Error. Not rename item.";
+}
+
+void MainWindow::on_actionToolbarMkdir_triggered()
+{
+    QString path = getCurrentPath();
+    QString itemName = getItemName();
+    QString mkdirPath;
+    QStringList list;
+
+    RenameDialog mkdirDialog;
+    mkdirDialog.setWindowTitle("Mkdir");
+
+    switch(mkdirDialog.exec())
+    {
+    case QDialog::Accepted:
+        itemName = mkdirDialog.ui->lineEdit->text();
+        mkdirPath = path + QDir::separator() + itemName;
+        list << mkdirPath;
+        break;
+    case QDialog::Rejected:
+        return;
+    }
+
+    if(utils->mkDirs(list)) {
+        qDebug() << "[Mkdir] Success! Created directory.";
+    }else
+        qDebug() << "[Mkdir] Error. Not creater directory item.";
 }

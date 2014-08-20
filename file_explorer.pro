@@ -14,9 +14,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    utils.cpp
+    utils.cpp \
+    renamedialog.cpp \
+    copydialog.cpp
 
 HEADERS  += mainwindow.h \
-    utils.h
+    utils.h \
+    renamedialog.h \
+    copydialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    renamedialog.ui \
+    copydialog.ui

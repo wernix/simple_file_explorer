@@ -38,6 +38,7 @@ private:
     QString getSourcePath();
     QString getDestinationPath();
     QString getCurrentPath();
+    QString getItemName();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -60,6 +61,8 @@ private slots:
     void on_right_customContextMenuRequested();
     void on_actionInfo_triggered();
     void on_actionToolbarQuit_triggered();
+    void on_actionToolbarRename_triggered();
+    void on_actionToolbarMkdir_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>425</width>
-    <height>322</height>
+    <width>523</width>
+    <height>337</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,7 +67,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>425</width>
+     <width>523</width>
      <height>20</height>
     </rect>
    </property>
@@ -101,12 +101,14 @@
     <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
-    <enum>BottomToolBarArea</enum>
+    <enum>RightToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionToolbarRename"/>
    <addaction name="actionToolbarGoHome"/>
+   <addaction name="actionToolbarMkdir"/>
    <addaction name="actionToolbarCopy"/>
    <addaction name="actionToolbarMove"/>
    <addaction name="actionToolbarRemove"/>
@@ -155,10 +157,13 @@
   </action>
   <action name="actionToolbarGoHome">
    <property name="text">
-    <string>[F2/Home]</string>
+    <string>[F3/Home]</string>
+   </property>
+   <property name="toolTip">
+    <string>[F3/Home]</string>
    </property>
    <property name="shortcut">
-    <string>F2</string>
+    <string>F3</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -183,6 +188,22 @@
    </property>
    <property name="shortcut">
     <string>F10</string>
+   </property>
+  </action>
+  <action name="actionToolbarRename">
+   <property name="text">
+    <string>[F2/Rename]</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
+  <action name="actionToolbarMkdir">
+   <property name="text">
+    <string>[F4/Mkdir]</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
    </property>
   </action>
  </widget>

@@ -141,3 +141,13 @@ bool Utils::dirExist(QString sourcePath)
 }
 
 
+// Rename item function
+bool Utils::rename(QString sourcePath, QString newPath)
+{
+    bool ok = false;
+
+    if(QDir().rename(sourcePath, newPath))
+        ok = true;
+
+    return ok;
+}
